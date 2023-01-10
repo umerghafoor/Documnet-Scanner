@@ -77,12 +77,15 @@ void main() {
 	Mat img = imread(path);
 	resize(img, img, Size(), 0.5, 0.5);
 
+	imshow("Orignal Image", img);
+
 	imgcany = preprocess(img);
+	imshow("Pre process", imgcany);
+
+
 	imgpoint = getContours(imgcany);
 	drawcont(imgpoint, Scalar(255, 0, 155));
 
 
-	imshow("Image", img);
-	imshow("Image canny", imgcany);
 	waitKey(0);
 }
