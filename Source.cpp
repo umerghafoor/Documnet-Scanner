@@ -1,8 +1,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/objdetect.hpp>
 #include <iostream>
+
 
 using namespace cv;
 using namespace std;
@@ -13,15 +13,18 @@ using namespace std;
 /////////////////////////////////////////////////////////////////////Declarations
 Mat img, imggryblr, imgcany;
 Mat imgcontr;
+Mat imgwarp;
 vector<Point> imgpoint;
+vector<Point> newpoints;
+float w = 420, h = 596;
 
-/////////////////////////////////////////////////////////////////Draw Contours
-void drawcont(vector<Point> point, Scalar color)
+/////////////////////////////////////////////////////////////////////Draw Contours
+void drawconts(vector<Point> points, Scalar color)
 {
-	for (int i = 0;i < point.size();i++)
+	for (int i = 0; i < points.size(); i++)
 	{
-		circle(img, point[i], 30, color, FILLED);
-		//	putText(img, (string)i, )
+		circle(img, points[i], 10, color, FILLED);
+		putText(img, to_string(i), points[i], FONT_HERSHEY_PLAIN, 4, color, 2);
 	}
 }
 
@@ -36,15 +39,17 @@ Mat preprocess(Mat img)
 	return imgcany;
 }
 /////////////////////////////////////////////////////////////////////Get Contours
-vector<Point> getContours(Mat imgcany) {
+vector<Point> getContours(Mat imgcany,Mat img) {
 
 	vector<vector<Point>> contours;
 	vector<Vec4i> hirarchy;
 
 	findContours(imgcany, contours, hirarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+	drawContours(img, contours, 0, Scalar(0, 0, 255), 4);
 
 	vector<vector<Point>> contpoly(contours.size());
 	vector<Rect> brect(contours.size());
+
 	vector<Point> bigest;
 	int Maxarea=0;
 
@@ -55,18 +60,38 @@ vector<Point> getContours(Mat imgcany) {
 		{
 			float peri = arcLength(contours[i], true);
 			approxPolyDP(contours[i], contpoly[i], 0.02 * peri, true);
-			if (contpoly[i].size() == 4 && area < Maxarea)
+			cout << endl << contpoly[i].size();
+			if (contpoly[i].size() == 4 && area > Maxarea)
 			{
-				drawContours(img, contpoly, i, Scalar(255, 0, 255), 5);
 				bigest = { contpoly[i][0],contpoly[i][1], contpoly[i][2], contpoly[i][3] };
 				area = Maxarea;
-				cout << endl << endl << "working" << endl << endl;
-				
+				cout << endl << endl << "         working          " << endl << endl;
+				drawContours(img, contours, i, Scalar(255, 0, 255), 2);
 			}
 			
 		}
 	}
 	return bigest;
+}
+////////////////////////////////////////////////////////////////////Reorder
+
+vector<Point> reorder(vector<Point> repoint)
+{
+	vector<Point> newpoint;
+	vector<int> sump, subp;
+
+	for (int i = 0;i < 4;i++)
+	{
+		sump.push_back(repoint[i].x + repoint[i].y);
+		subp.push_back(repoint[i].x - repoint[i].y);
+	}
+
+	newpoint.push_back(repoint[min_element(sump.begin(), sump.end()) - sump.begin()]);
+	newpoint.push_back(repoint[max_element(subp.begin(), subp.end()) - subp.begin()]);
+	newpoint.push_back(repoint[min_element(subp.begin(), subp.end()) - subp.begin()]);
+	newpoint.push_back(repoint[max_element(sump.begin(), sump.end()) - sump.begin()]);
+
+	return newpoint;
 }
 
 ///////////////////////////////////////////MAIN FUNCTIONS////////////////////////////////////////////////////
@@ -74,18 +99,22 @@ vector<Point> getContours(Mat imgcany) {
 void main() {
 
 	string path = "Resources/paper.jpg";
-	Mat img = imread(path);
+	img = imread(path);
 	resize(img, img, Size(), 0.5, 0.5);
 
 	imshow("Orignal Image", img);
 
 	imgcany = preprocess(img);
 	imshow("Pre process", imgcany);
+	
+	imgpoint = getContours(imgcany,img);
+	newpoints = reorder(imgpoint);
+	drawconts(newpoints, Scalar(0, 255, 255));
+	imshow("Orignal Image Points", img);
 
+	imgwarp = Warp();
 
-	imgpoint = getContours(imgcany);
-	drawcont(imgpoint, Scalar(255, 0, 155));
-
+	
 
 	waitKey(0);
 }
