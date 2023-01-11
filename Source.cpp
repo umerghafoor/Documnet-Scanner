@@ -60,13 +60,13 @@ vector<Point> getContours(Mat imgcany,Mat img) {
 		{
 			float peri = arcLength(contours[i], true);
 			approxPolyDP(contours[i], contpoly[i], 0.02 * peri, true);
-			cout << endl << contpoly[i].size();
+		//	cout << endl << contpoly[i].size();
 			if (contpoly[i].size() == 4 && area > Maxarea)
 			{
 				bigest = { contpoly[i][0],contpoly[i][1], contpoly[i][2], contpoly[i][3] };
 				area = Maxarea;
-				cout << endl << endl << "         working          " << endl << endl;
-				drawContours(img, contours, i, Scalar(255, 0, 255), 2);
+			//	cout << endl << endl << "         working          " << endl << endl;
+			//	drawContours(img, contours, i, Scalar(255, 0, 255), 2);
 			}
 			
 		}
@@ -93,28 +93,82 @@ vector<Point> reorder(vector<Point> repoint)
 
 	return newpoint;
 }
+////////////////////////////////////////////////////////////////////////////Warping
+
+Mat warp(Mat img, vector<Point> point, float w, float h)
+{
+	Point2f scr[4] = { point[0],point[1], point[2], point[3] };
+	Point2f dst[4] = { {0.0f,0.0f},{w,0.0f}, {0.0f,h}, {w,h} };
+
+	Mat matrix = getPerspectiveTransform(scr, dst);
+	warpPerspective(img, imgwarp, matrix, Point(w, h));
+
+	return imgwarp;
+}
+
 
 ///////////////////////////////////////////MAIN FUNCTIONS////////////////////////////////////////////////////
 
+//void main() {
+//
+//	string path = "Resources/paper.jpg";
+//	img = imread(path);
+////resize(img, img, Size(), 0.5, 0.5);
+//
+////	imshow("Orignal Image", img);
+//
+//	imgcany = preprocess(img);
+////	imshow("Pre process", imgcany);
+//	
+//	imgpoint = getContours(imgcany,img);
+//	newpoints = reorder(imgpoint);
+//	
+//
+//	imgwarp = warp(img,newpoints,w,h);
+//	float crpv = 5;
+//	Rect roi(crpv, crpv, w - (2 * crpv), h - (2 * crpv));
+//	imgwarp = imgwarp(roi);
+//	imshow("Image warp", imgwarp);
+//	imwrite("Resources/Scaned/1.png", imgwarp);
+//
+//	drawconts(newpoints, Scalar(0, 255, 255));
+//	imshow("Orignal Image Points", img);
+//	
+//
+//	waitKey(0);
+//}
+
+////////////////////////////////////////////////////Main for vedio///////////////////////////////////////////
 void main() {
 
-	string path = "Resources/paper.jpg";
-	img = imread(path);
-	resize(img, img, Size(), 0.5, 0.5);
+	int captur=1;
+	float crpv = 5;
+	VideoCapture cap(0);
+//	resize(img, img, Size(), 0.5, 0.5);
 
-	imshow("Orignal Image", img);
+	while (captur)
+	{
+		//	cout << "Start Working" << endl;
+		cap.read(img);
 
-	imgcany = preprocess(img);
-	imshow("Pre process", imgcany);
+		imgcany = preprocess(img);
+		//	imshow("Pre process", imgcany);
+
+		imgpoint = getContours(imgcany, img);
+		newpoints = reorder(imgpoint);
+
+		imgwarp = warp(img, newpoints, w, h);
+
+		Rect roi(crpv, crpv, w - (2 * crpv), h - (2 * crpv));
+		imgwarp = imgwarp(roi);
+		imshow("Image warp", imgwarp);
+		imwrite("Resources/Scaned/1.png", imgwarp);
+
+		drawconts(newpoints, Scalar(0, 255, 255));
+		imshow("Orignal Image Points", img);
+
+		//	cout << "End Working" << endl;
+		waitKey(1);
+	}
 	
-	imgpoint = getContours(imgcany,img);
-	newpoints = reorder(imgpoint);
-	drawconts(newpoints, Scalar(0, 255, 255));
-	imshow("Orignal Image Points", img);
-
-//	imgwarp = Warp();
-
-	
-
-	waitKey(0);
 }
