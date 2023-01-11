@@ -113,7 +113,7 @@ void main() {
 
 	string path = "Resources/paper.jpg";
 	img = imread(path);
-//resize(img, img, Size(), 0.5, 0.5);
+//	resize(img, img, Size(), 0.5, 0.5);
 
 //	imshow("Orignal Image", img);
 
