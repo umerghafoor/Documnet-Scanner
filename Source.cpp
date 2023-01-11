@@ -109,36 +109,37 @@ Mat warp(Mat img, vector<Point> point, float w, float h)
 
 ///////////////////////////////////////////MAIN FUNCTIONS////////////////////////////////////////////////////
 
-//void main() {
-//
-//	string path = "Resources/paper.jpg";
-//	img = imread(path);
-////resize(img, img, Size(), 0.5, 0.5);
-//
-////	imshow("Orignal Image", img);
-//
-//	imgcany = preprocess(img);
-////	imshow("Pre process", imgcany);
-//	
-//	imgpoint = getContours(imgcany,img);
-//	newpoints = reorder(imgpoint);
-//	
-//
-//	imgwarp = warp(img,newpoints,w,h);
-//	float crpv = 5;
-//	Rect roi(crpv, crpv, w - (2 * crpv), h - (2 * crpv));
-//	imgwarp = imgwarp(roi);
-//	imshow("Image warp", imgwarp);
-//	imwrite("Resources/Scaned/1.png", imgwarp);
-//
-//	drawconts(newpoints, Scalar(0, 255, 255));
-//	imshow("Orignal Image Points", img);
-//	
-//
-//	waitKey(0);
-//}
+void main() {
+
+	string path = "Resources/paper.jpg";
+	img = imread(path);
+//resize(img, img, Size(), 0.5, 0.5);
+
+//	imshow("Orignal Image", img);
+
+	imgcany = preprocess(img);
+//	imshow("Pre process", imgcany);
+	
+	imgpoint = getContours(imgcany,img);
+	newpoints = reorder(imgpoint);
+	
+
+	imgwarp = warp(img,newpoints,w,h);
+	float crpv = 5;
+	Rect roi(crpv, crpv, w - (2 * crpv), h - (2 * crpv));
+	imgwarp = imgwarp(roi);
+	imshow("Image warp", imgwarp);
+	imwrite("Resources/Scaned/1.png", imgwarp);
+
+	drawconts(newpoints, Scalar(0, 255, 255));
+	imshow("Orignal Image Points", img);
+	
+
+	waitKey(0);
+}
 
 ////////////////////////////////////////////////////Main for vedio///////////////////////////////////////////
+/*
 void main() {
 
 	int captur=1;
@@ -171,4 +172,4 @@ void main() {
 		waitKey(1);
 	}
 	
-}
+}*/
