@@ -1,5 +1,0 @@
-﻿  Source.cpp
-D:\GitHub\Documnet-Scanner\Source.cpp(58,12): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-D:\GitHub\Documnet-Scanner\Source.cpp(61,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\GitHub\Documnet-Scanner\Source.cpp(99,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
-  Documnet-Scanner.vcxproj -> D:\GitHub\x64\Debug\Documnet-Scanner.exe
