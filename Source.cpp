@@ -23,9 +23,13 @@ void drawconts(vector<Point> points, Scalar color)
 {
 	for (int i = 0; i < points.size(); i++)
 	{
-		circle(img, points[i], 10, color, FILLED);
-		putText(img, to_string(i), points[i], FONT_HERSHEY_PLAIN, 4, color, 2);
+		circle(img, points[i], 4, color, FILLED);
+//		putText(img, to_string(i), points[i], FONT_HERSHEY_PLAIN, 4, color, 2);
 	}
+	line(img, points[0], points[1], color, 2);
+	line(img, points[1], points[3], color, 2);
+	line(img, points[2], points[3], color, 2);
+	line(img, points[0], points[2], color, 2);
 }
 
 /////////////////////////////////////////////////////////////////////PreProcecing
@@ -45,7 +49,7 @@ vector<Point> getContours(Mat imgcany,Mat img) {
 	vector<Vec4i> hirarchy;
 
 	findContours(imgcany, contours, hirarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-	drawContours(img, contours, 0, Scalar(0, 0, 255), 4);
+//	drawContours(img, contours, 0, Scalar(0, 0, 255), 4);
 
 	vector<vector<Point>> contpoly(contours.size());
 	vector<Rect> brect(contours.size());
@@ -56,7 +60,7 @@ vector<Point> getContours(Mat imgcany,Mat img) {
 	for (int i = 0;i < contours.size();i++)
 	{
 		int area = contourArea(contours[i]);
-		if (area > 100)
+		if (area > 1000)
 		{
 			float peri = arcLength(contours[i], true);
 			approxPolyDP(contours[i], contpoly[i], 0.02 * peri, true);
@@ -103,73 +107,72 @@ Mat warp(Mat img, vector<Point> point, float w, float h)
 	Mat matrix = getPerspectiveTransform(scr, dst);
 	warpPerspective(img, imgwarp, matrix, Point(w, h));
 
+	float crpv = 5;
+	Rect roi(crpv, crpv, w - (2 * crpv), h - (2 * crpv));
+	imgwarp = imgwarp(roi);
+
 	return imgwarp;
 }
 
 
 ///////////////////////////////////////////MAIN FUNCTIONS////////////////////////////////////////////////////
 
-void main() {
-
-	string path = "Resources/paper.jpg";
-	img = imread(path);
+//void main() {
+//
+//	string path = "Resources/paper.jpg";
+//	img = imread(path);
+//
+////	imshow("Orignal Image", img);
+//
+//	imgcany = preprocess(img);
+////	imshow("Pre process", imgcany);
+//	
+//	imgpoint = getContours(imgcany,img);
+//	newpoints = reorder(imgpoint);
+//
+//	imgwarp = warp(img,newpoints,w,h);
+//	imshow("Image warp", imgwarp);
+//	imwrite("Resources/Scaned/1.png", imgwarp);
+//
+//	drawconts(newpoints, Scalar(0, 255, 255));
 //	resize(img, img, Size(), 0.5, 0.5);
-
-//	imshow("Orignal Image", img);
-
-	imgcany = preprocess(img);
-//	imshow("Pre process", imgcany);
-	
-	imgpoint = getContours(imgcany,img);
-	newpoints = reorder(imgpoint);
-	
-
-	imgwarp = warp(img,newpoints,w,h);
-	float crpv = 5;
-	Rect roi(crpv, crpv, w - (2 * crpv), h - (2 * crpv));
-	imgwarp = imgwarp(roi);
-	imshow("Image warp", imgwarp);
-	imwrite("Resources/Scaned/1.png", imgwarp);
-
-	drawconts(newpoints, Scalar(0, 255, 255));
-	imshow("Orignal Image Points", img);
-	
-
-	waitKey(0);
-}
+//	imshow("Orignal Image Points", img);
+//
+//	waitKey(0);
+//}
 
 ////////////////////////////////////////////////////Main for vedio///////////////////////////////////////////
-/*
+
 void main() {
 
-	int captur=1;
-	float crpv = 5;
 	VideoCapture cap(0);
 //	resize(img, img, Size(), 0.5, 0.5);
 
-	while (captur)
+	while (true)
 	{
 		//	cout << "Start Working" << endl;
 		cap.read(img);
+		flip(img, img, 1);
 
 		imgcany = preprocess(img);
-		//	imshow("Pre process", imgcany);
+	//	imshow("Pre process", imgcany);
 
 		imgpoint = getContours(imgcany, img);
-		newpoints = reorder(imgpoint);
+		if (!imgpoint.empty())
+		{
+			newpoints = reorder(imgpoint);
 
-		imgwarp = warp(img, newpoints, w, h);
+			imgwarp = warp(img, newpoints, w, h);
+			flip(imgwarp, imgwarp, 1);
+			imshow("Image warp", imgwarp);
+			imwrite("Resources/Scaned/1.png", imgwarp);
 
-		Rect roi(crpv, crpv, w - (2 * crpv), h - (2 * crpv));
-		imgwarp = imgwarp(roi);
-		imshow("Image warp", imgwarp);
-		imwrite("Resources/Scaned/1.png", imgwarp);
+			drawconts(newpoints, Scalar(0, 255, 255));
+		}
 
-		drawconts(newpoints, Scalar(0, 255, 255));
 		imshow("Orignal Image Points", img);
-
 		//	cout << "End Working" << endl;
 		waitKey(1);
 	}
 	
-}*/
+}
