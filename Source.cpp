@@ -145,7 +145,12 @@ Mat warp(Mat img, vector<Point> point, float w, float h)
 
 void main() {
 
-	VideoCapture cap(0);
+	int camerano = 0;
+	cout << "Enter the camera ID" << endl;
+	cout << "0-For Default camera " << endl;
+	cout << "1-If Additional webcam is attached " << endl;
+	cin >> camerano;
+	VideoCapture cap(camerano);
 //	resize(img, img, Size(), 0.5, 0.5);
 
 	while (true)
