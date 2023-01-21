@@ -3,27 +3,28 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
+//using namespace cv;
+//using namespace std;
 
-using namespace cv;
-using namespace std;
-
-
+////////////////////////////////////////////////////////
 ///////////////  Document Scanner //////////////////////
+////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////Declarations
-Mat img, imggryblr, imgcany;
-Mat imgcontr;
-Mat imgwarp;
-vector<Point> imgpoint;
-vector<Point> newpoints;
+cv::Mat img, imggryblr, imgcany;
+cv::Mat imgcontr;
+cv::Mat imgwarp;
+cv::Mat imgclr;
+std::vector<cv::Point> imgpoint;
+std::vector<cv::Point> newpoints;
 float w = 420, h = 596;
 
 /////////////////////////////////////////////////////////////////////Draw Contours
-void drawconts(vector<Point> points, Scalar color)
+void drawconts(std::vector<cv::Point> points, cv::Scalar color)
 {
 	for (int i = 0; i < points.size(); i++)
 	{
-		circle(img, points[i], 4, color, FILLED);
+		circle(img, points[i], 4, color, cv::FILLED);
 //		putText(img, to_string(i), points[i], FONT_HERSHEY_PLAIN, 4, color, 2);
 	}
 	line(img, points[0], points[1], color, 2);
@@ -33,34 +34,34 @@ void drawconts(vector<Point> points, Scalar color)
 }
 
 /////////////////////////////////////////////////////////////////////PreProcecing
-Mat preprocess(Mat img)
+cv::Mat preprocess(cv::Mat img)
 {
-	cvtColor(img, imggryblr, COLOR_BGR2GRAY);
-	GaussianBlur(imggryblr, imggryblr, Size(5, 5), 5, 0);
+	cvtColor(img, imggryblr, cv::COLOR_BGR2GRAY);
+	GaussianBlur(imggryblr, imggryblr, cv::Size(5, 5), 5, 0);
 	Canny(imggryblr, imgcany, 30, 100);
-	Mat k = getStructuringElement(MORPH_RECT, Size(3, 3));
+	cv::Mat k = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
 	dilate(imgcany, imgcany, k);
 	return imgcany;
 }
 /////////////////////////////////////////////////////////////////////Get Contours
-vector<Point> getContours(Mat imgcany,Mat img) {
+std::vector<cv::Point> getContours(cv::Mat imgcany, cv::Mat img) {
 
-	vector<vector<Point>> contours;
-	vector<Vec4i> hirarchy;
+	std::vector<std::vector<cv::Point>> contours;
+	std::vector<cv::Vec4i> hirarchy;
 
-	findContours(imgcany, contours, hirarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+	findContours(imgcany, contours, hirarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 //	drawContours(img, contours, 0, Scalar(0, 0, 255), 4);
 
-	vector<vector<Point>> contpoly(contours.size());
-	vector<Rect> brect(contours.size());
+	std::vector<std::vector<cv::Point>> contpoly(contours.size());
+	std::vector<cv::Rect> brect(contours.size());
 
-	vector<Point> bigest;
+	std::vector<cv::Point> bigest;
 	int Maxarea=0;
 
 	for (int i = 0;i < contours.size();i++)
 	{
 		int area = contourArea(contours[i]);
-		if (area > 1000)
+		if (area > 10000)
 		{
 			float peri = arcLength(contours[i], true);
 			approxPolyDP(contours[i], contpoly[i], 0.02 * peri, true);
@@ -74,15 +75,16 @@ vector<Point> getContours(Mat imgcany,Mat img) {
 			}
 			
 		}
+		//drawContours(img, contours, i, cv::Scalar(255, 0, 255), 2);
 	}
 	return bigest;
 }
 ////////////////////////////////////////////////////////////////////Reorder
 
-vector<Point> reorder(vector<Point> repoint)
+std::vector<cv::Point> reorder(std::vector<cv::Point> repoint)
 {
-	vector<Point> newpoint;
-	vector<int> sump, subp;
+	std::vector<cv::Point> newpoint;
+	std::vector<int> sump, subp;
 
 	for (int i = 0;i < 4;i++)
 	{
@@ -99,16 +101,16 @@ vector<Point> reorder(vector<Point> repoint)
 }
 ////////////////////////////////////////////////////////////////////////////Warping
 
-Mat warp(Mat img, vector<Point> point, float w, float h)
+cv::Mat warp(cv::Mat img, std::vector<cv::Point> point, float w, float h)
 {
-	Point2f scr[4] = { point[0],point[1], point[2], point[3] };
-	Point2f dst[4] = { {0.0f,0.0f},{w,0.0f}, {0.0f,h}, {w,h} };
+	cv::Point2f scr[4] = { point[0],point[1], point[2], point[3] };
+	cv::Point2f dst[4] = { {0.0f,0.0f},{w,0.0f}, {0.0f,h}, {w,h} };
 
-	Mat matrix = getPerspectiveTransform(scr, dst);
-	warpPerspective(img, imgwarp, matrix, Point(w, h));
+	cv::Mat matrix = getPerspectiveTransform(scr, dst);
+	warpPerspective(img, imgwarp, matrix, cv::Point(w, h));
 
 	float crpv = 5;
-	Rect roi(crpv, crpv, w - (2 * crpv), h - (2 * crpv));
+	cv::Rect roi(crpv, crpv, w - (2 * crpv), h - (2 * crpv));
 	imgwarp = imgwarp(roi);
 
 	return imgwarp;
@@ -116,10 +118,10 @@ Mat warp(Mat img, vector<Point> point, float w, float h)
 
 
 ///////////////////////////////////////////MAIN FUNCTIONS////////////////////////////////////////////////////
-
+//
 //void main() {
 //
-//	string path = "Resources/paper.jpg";
+//	string path = "Resources/img.jpg";
 //	img = imread(path);
 //
 ////	imshow("Orignal Image", img);
@@ -146,11 +148,11 @@ Mat warp(Mat img, vector<Point> point, float w, float h)
 void main() {
 
 	int camerano = 0;
-	cout << "Enter the camera ID" << endl;
-	cout << "0-For Default camera " << endl;
-	cout << "1-If Additional webcam is attached " << endl;
-	cin >> camerano;
-	VideoCapture cap(camerano);
+	std::cout << "Enter the camera ID" << std::endl;
+	std::cout << "0-For Default camera " << std::endl;
+	std::cout << "1-If Additional webcam is attached " << std::endl;
+	std::cin >> camerano;
+	cv::VideoCapture cap(camerano);
 //	resize(img, img, Size(), 0.5, 0.5);
 
 	while (true)
@@ -171,13 +173,14 @@ void main() {
 			flip(imgwarp, imgwarp, 1);
 			imshow("Image warp", imgwarp);
 			imwrite("Resources/Scaned/1.png", imgwarp);
-
-			drawconts(newpoints, Scalar(0, 255, 255));
+			//Canny(imgwarp, imgclr, 30, 10);
+			//imshow("Image clear", imgclr);
+			drawconts(newpoints, cv::Scalar(0, 255, 255));
 		}
 
 		imshow("Orignal Image Points", img);
 		//	cout << "End Working" << endl;
-		waitKey(1);
+		cv::waitKey(1);
 	}
 	
 }
