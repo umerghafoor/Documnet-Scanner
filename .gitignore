@@ -3,3 +3,6 @@ x64
 Documnet-Scanner.vcxproj
 Documnet-Scanner.vcxproj.filters
 Documnet-Scanner.vcxproj.user
+Document-Scanner/Document-Scanner.vcxproj
+Document-Scanner/Document-Scanner.vcxproj.filters
+Document-Scanner/Document-Scanner.vcxproj.user
