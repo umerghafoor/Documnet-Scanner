@@ -14,3 +14,6 @@ The program will process the vedio from your webcam and display the scanned outp
 + **Output image saving:** The scanned output can be saved in digital format.
 License
 it is free and open-source project.
+
+# Authors
+Umer Ghafoor https://github.com/umerghafoor
